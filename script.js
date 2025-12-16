@@ -6,9 +6,6 @@
 // Replace this with your actual OpenStates API key
 const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
 
-/**
- * Main function to look up representatives by address
- */
 async function lookupReps() {
   const addressInput = document.getElementById("addressInput");
   const resultsDiv = document.getElementById("results");
@@ -21,32 +18,23 @@ async function lookupReps() {
 
   resultsDiv.innerHTML = "<p>Loading...</p>";
 
-  // Construct OpenStates API URL
   const url = `https://v3.openstates.org/people?jurisdiction=US&address=${encodeURIComponent(address)}&apikey=${API_KEY}`;
 
   try {
     const response = await fetch(url);
-
     if (!response.ok) {
       resultsDiv.innerHTML = `<p>Error ${response.status}: Could not retrieve representatives.</p>`;
       return;
     }
 
     const data = await response.json();
-
-    // Render the results
     renderResults(data.results);
-
   } catch (error) {
     console.error("Network or fetch error:", error);
     resultsDiv.innerHTML = "<p>Network error while retrieving data.</p>";
   }
 }
 
-/**
- * Renders the representative results into the page
- * @param {Array} reps - Array of representative objects from OpenStates
- */
 function renderResults(reps) {
   const resultsDiv = document.getElementById("results");
 
@@ -55,7 +43,6 @@ function renderResults(reps) {
     return;
   }
 
-  // Build HTML for each representative
   resultsDiv.innerHTML = reps
     .map(rep => {
       const name = rep.name || "Unknown";
@@ -78,7 +65,7 @@ function renderResults(reps) {
     .join("");
 }
 
-// Optional: Add listener to handle Enter key in the input field
+// Optional: handle Enter key press
 document.getElementById("addressInput").addEventListener("keypress", function(e) {
   if (e.key === "Enter") {
     lookupReps();
