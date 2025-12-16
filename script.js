@@ -2,7 +2,7 @@
 // Civic Representatives Lookup
 // =======================
 
-// Replace with your OpenStates API key
+// Your OpenStates API key
 const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -59,24 +59,22 @@ async function lookupReps() {
 
     const data = await response.json();
 
+    // === Handle empty results ===
     if (!data.results || data.results.length === 0) {
-      resultsDiv.innerHTML = "<p>No representatives found for this address.</p>";
+      resultsDiv.innerHTML = "<p>No state representatives found for this address.</p>";
+      federalSenateDiv.innerHTML = "<h2>U.S. Senators</h2><p>Federal representatives are not available through OpenStates.</p>";
+      federalHouseDiv.innerHTML = "<h2>U.S. House Representatives</h2><p>Federal representatives are not available through OpenStates.</p>";
       return;
     }
 
     resultsDiv.innerHTML = ""; // clear loading
 
-    const federalReps = data.results.filter(r =>
-      r.current_role && r.current_role.org.name.includes("United States")
-    );
+    // Show state reps
+    renderResults(data.results, stateDiv, "State Representatives");
 
-    const federalSenate = federalReps.filter(r => r.current_role.org_classification === "upper");
-    const federalHouse = federalReps.filter(r => r.current_role.org_classification === "lower");
-    const stateReps = data.results.filter(r => !federalReps.includes(r));
-
-    renderResults(federalSenate, federalSenateDiv, "U.S. Senators");
-    renderResults(federalHouse, federalHouseDiv, "U.S. House Representatives");
-    renderResults(stateReps, stateDiv, "State Representatives");
+    // Show message for federal reps
+    federalSenateDiv.innerHTML = "<h2>U.S. Senators</h2><p>Federal representatives are not available through OpenStates.</p>";
+    federalHouseDiv.innerHTML = "<h2>U.S. House Representatives</h2><p>Federal representatives are not available through OpenStates.</p>";
 
   } catch (error) {
     console.error(error);
