@@ -1,5 +1,14 @@
-const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
+// =======================
+// script.js
+// OpenStates Representative Lookup
+// =======================
 
+// Replace this with your actual OpenStates API key
+const API_KEY = "YOUR_OPENSTATES_KEY_HERE";
+
+/**
+ * Main function to look up representatives by address
+ */
 async function lookupReps() {
   const addressInput = document.getElementById("addressInput");
   const resultsDiv = document.getElementById("results");
@@ -12,103 +21,66 @@ async function lookupReps() {
 
   resultsDiv.innerHTML = "<p>Loading...</p>";
 
+  // Construct OpenStates API URL
   const url = `https://v3.openstates.org/people?jurisdiction=US&address=${encodeURIComponent(address)}&apikey=${API_KEY}`;
 
   try {
     const response = await fetch(url);
+
     if (!response.ok) {
       resultsDiv.innerHTML = `<p>Error ${response.status}: Could not retrieve representatives.</p>`;
       return;
     }
 
     const data = await response.json();
+
+    // Render the results
     renderResults(data.results);
+
   } catch (error) {
-    console.error(error);
+    console.error("Network or fetch error:", error);
     resultsDiv.innerHTML = "<p>Network error while retrieving data.</p>";
   }
 }
 
+/**
+ * Renders the representative results into the page
+ * @param {Array} reps - Array of representative objects from OpenStates
+ */
 function renderResults(reps) {
   const resultsDiv = document.getElementById("results");
+
   if (!reps || reps.length === 0) {
     resultsDiv.innerHTML = "<p>No representatives found for this address.</p>";
     return;
   }
 
+  // Build HTML for each representative
   resultsDiv.innerHTML = reps
-    .map(
-      (rep) => `
-    <div class="rep-card">
-      <h3>${rep.name}</h3>
-      <p>${rep.party ? rep.party : ""} — ${rep.current_role ? rep.current_role.org_classification : ""}</p>
-      <p>${rep.offices && rep.offices.length ? rep.offices.map(o => o.phone || "").join(", ") : ""}</p>
-      <p><a href="${rep.urls && rep.urls.length ? rep.urls[0] : "#"}" target="_blank">Website</a></p>
-    </div>
-  `
-    )
+    .map(rep => {
+      const name = rep.name || "Unknown";
+      const party = rep.party ? ` (${rep.party})` : "";
+      const role = rep.current_role ? rep.current_role.org_classification : "";
+      const phones = rep.offices && rep.offices.length
+        ? rep.offices.map(o => o.phone).filter(Boolean).join(", ")
+        : "No phone listed";
+      const urls = rep.urls && rep.urls.length ? rep.urls[0] : "#";
+
+      return `
+      <div class="rep-card">
+        <h3>${name}${party}</h3>
+        <p>Office: ${role}</p>
+        <p>Phone: ${phones}</p>
+        <p><a href="${urls}" target="_blank">Website</a></p>
+      </div>
+      `;
+    })
     .join("");
 }
 
-
-function renderResults(data) {
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = "";
-
-  const offices = data.offices || [];
-  const officials = data.officials || [];
-
-  const sections = {
-    Federal: ["President", "Vice President", "United States Senate", "United States House of Representatives"],
-    State: ["Governor", "Lieutenant Governor", "State Senate", "State House"],
-    County: ["County"],
-    Local: ["Mayor", "City Council", "Town Council", "Local"]
-  };
-
-  const levelGroups = {
-    Federal: [],
-    State: [],
-    County: [],
-    Local: []
-  };
-
-  offices.forEach((office, idx) => {
-    const officeName = office.name;
-    const indices = office.officialIndices || [];
-
-    let level = "Local"; 
-    if (sections.Federal.some(t => officeName.includes(t))) level = "Federal";
-    else if (sections.State.some(t => officeName.includes(t))) level = "State";
-    else if (sections.County.some(t => officeName.includes(t))) level = "County";
-
-    indices.forEach(i => {
-      const official = officials[i];
-      levelGroups[level].push({ office: officeName, official });
-    });
-  });
-
-  Object.keys(levelGroups).forEach(level => {
-    if (levelGroups[level].length > 0) {
-      const sectionDiv = document.createElement("div");
-      sectionDiv.className = "section";
-      sectionDiv.innerHTML = `<h2>${level}</h2>`;
-
-      levelGroups[level].forEach(item => {
-        const card = document.createElement("div");
-        card.className = "official-card";
-
-        card.innerHTML = `
-          <div class="office-title">${item.office}</div>
-          <div><strong>${item.official.name || ""}</strong></div>
-          <div>${item.official.party || ""}</div>
-          <div>${item.official.phones ? item.official.phones.join(", ") : ""}</div>
-          <div>${item.official.emails ? item.official.emails.join(", ") : ""}</div>
-          <div>${item.official.urls ? item.official.urls.join(", ") : ""}</div>
-        `;
-        sectionDiv.appendChild(card);
-      });
-
-      resultsDiv.appendChild(sectionDiv);
-    }
-  });
-}
+// Optional: Add listener to handle Enter key in the input field
+document.getElementById("addressInput").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    lookupReps();
+  }
+});
