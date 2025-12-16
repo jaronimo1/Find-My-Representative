@@ -1,9 +1,3 @@
-// =======================
-// script.js
-// OpenStates Representative Lookup
-// =======================
-
-// Replace this with your OpenStates API key
 const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,6 +20,8 @@ async function lookupReps() {
   const state = document.getElementById("stateInput")?.value.trim().toUpperCase();
 
   const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "<p>Loading...</p>";
+
   const federalDiv = document.getElementById("federalReps");
   const stateDiv = document.getElementById("stateReps");
 
@@ -36,8 +32,6 @@ async function lookupReps() {
     resultsDiv.innerHTML = "<p>Please fill in Street, City, and State (2-letter code).</p>";
     return;
   }
-
-  resultsDiv.innerHTML = "<p>Loading...</p>";
 
   const fullAddress = `${street}, ${city}, ${state}`;
   const url = `https://v3.openstates.org/people?jurisdiction=${state}&address=${encodeURIComponent(fullAddress)}&apikey=${API_KEY}`;
@@ -52,16 +46,28 @@ async function lookupReps() {
     const data = await response.json();
     resultsDiv.innerHTML = ""; // Clear loading
 
-    // Separate federal vs state
+    // Filter federal and state reps
     const federalReps = data.results.filter(r =>
       r.current_role &&
       r.current_role.org_classification === "upper" &&
       r.current_role.org.name.includes("United States")
     );
 
+    const federalHouse = federalReps.filter(r =>
+      r.current_role.org_classification === "lower" &&
+      r.current_role.org.name.includes("United States")
+    );
+
+    const federalSenate = federalReps.filter(r =>
+      r.current_role.org_classification === "upper" &&
+      r.current_role.org.name.includes("United States")
+    );
+
     const stateReps = data.results.filter(r => !federalReps.includes(r));
 
-    renderResults(federalReps, federalDiv, "Federal Representatives");
+    // Render sections
+    renderResults(federalSenate, federalDiv, "U.S. Senators");
+    renderResults(federalHouse, federalDiv, "U.S. House Representatives");
     renderResults(stateReps, stateDiv, "State Representatives");
 
   } catch (error) {
@@ -72,11 +78,11 @@ async function lookupReps() {
 
 function renderResults(reps, container, title) {
   if (!reps || reps.length === 0) {
-    container.innerHTML = `<h2>${title}</h2><p>No representatives found.</p>`;
+    container.innerHTML += `<h2>${title}</h2><p>No representatives found.</p>`;
     return;
   }
 
-  container.innerHTML = `<h2>${title}</h2>` + reps.map(rep => {
+  container.innerHTML += `<h2>${title}</h2>` + reps.map(rep => {
     const name = rep.name || "Unknown";
     const party = rep.party ? ` (${rep.party})` : "";
     const role = rep.current_role ? rep.current_role.org_classification : "";
