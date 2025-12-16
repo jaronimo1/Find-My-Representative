@@ -2,36 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find Your Representatives</title>
+  <title>Find My Representative</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Find Your Representatives</h1>
+    <h1>Find My Representative</h1>
 
-    <div class="input-group">
-      <label for="streetInput">Street Address</label>
-      <input type="text" id="streetInput" placeholder="123 Main St">
+    <div class="inputs">
+      <input type="text" id="streetInput" placeholder="Street Address">
+      <input type="text" id="cityInput" placeholder="City">
+      <input type="text" id="stateInput" placeholder="State (e.g., NC)">
+      <button id="findButton">Find Representatives</button>
     </div>
 
-    <div class="input-group">
-      <label for="cityInput">City</label>
-      <input type="text" id="cityInput" placeholder="Aberdeen">
-    </div>
+    <div id="results"></div>
 
-    <div class="input-group">
-      <label for="stateInput">State (2-letter code)</label>
-      <input type="text" id="stateInput" placeholder="NC" maxlength="2">
-    </div>
-
-    <button id="findButton">Find Representatives</button>
-
-    <div id="results">
-      <div id="federalSenate"></div>
-      <div id="federalHouse"></div>
-      <div id="stateReps"></div>
-    </div>
+    <div id="federalSenate"></div>
+    <div id="federalHouse"></div>
+    <div id="stateReps"></div>
   </div>
 
   <script src="script.js"></script>
