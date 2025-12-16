@@ -47,7 +47,7 @@ async function lookupReps() {
   stateDiv.innerHTML = "";
 
   const fullAddress = `${street}, ${city}, ${state}`;
-  const url = `https://v3.openstates.org/people?jurisdiction=${state}&address=${encodeURIComponent(fullAddress)}&apikey=${API_KEY}`;
+  const url = `http://localhost:3000/getReps?address=${encodeURIComponent(fullAddress)}&state=${state}`;
 
   try {
     const response = await fetch(url);
