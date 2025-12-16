@@ -10,33 +10,44 @@ async function lookupReps() {
     return;
   }
 
-  const url =
-    "https://civicinfo.googleapis.com/civicinfo/v2/representatives" +
-    "?address=" + encodeURIComponent(address) +
-    "&key=" + API_KEY;
-
-  console.log("Request URL:", url);
-
   resultsDiv.innerHTML = "<p>Loading...</p>";
+
+  const url = `https://v3.openstates.org/people?jurisdiction=US&address=${encodeURIComponent(address)}&apikey=${API_KEY}`;
 
   try {
     const response = await fetch(url);
-
     if (!response.ok) {
-      const text = await response.text();
-      console.error("API error:", response.status, text);
-      resultsDiv.innerHTML =
-        `<p>Error ${response.status}: Unable to retrieve representative data.</p>`;
+      resultsDiv.innerHTML = `<p>Error ${response.status}: Could not retrieve representatives.</p>`;
       return;
     }
 
     const data = await response.json();
-    renderResults(data);
-
+    renderResults(data.results);
   } catch (error) {
-    console.error("Fetch failed:", error);
-    resultsDiv.innerHTML = "<p>Network error contacting data service.</p>";
+    console.error(error);
+    resultsDiv.innerHTML = "<p>Network error while retrieving data.</p>";
   }
+}
+
+function renderResults(reps) {
+  const resultsDiv = document.getElementById("results");
+  if (!reps || reps.length === 0) {
+    resultsDiv.innerHTML = "<p>No representatives found for this address.</p>";
+    return;
+  }
+
+  resultsDiv.innerHTML = reps
+    .map(
+      (rep) => `
+    <div class="rep-card">
+      <h3>${rep.name}</h3>
+      <p>${rep.party ? rep.party : ""} — ${rep.current_role ? rep.current_role.org_classification : ""}</p>
+      <p>${rep.offices && rep.offices.length ? rep.offices.map(o => o.phone || "").join(", ") : ""}</p>
+      <p><a href="${rep.urls && rep.urls.length ? rep.urls[0] : "#"}" target="_blank">Website</a></p>
+    </div>
+  `
+    )
+    .join("");
 }
 
 
