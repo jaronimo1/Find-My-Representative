@@ -1,33 +1,44 @@
-const API_KEY = "YOUR_API_KEY_HERE";
+const API_KEY = "AIzaSyB3JXwEtBwtZGUesSJWM2QsI4IJWgyxeVs";
 
 async function lookupReps() {
-  const address = document.getElementById("addressInput").value.trim();
+  const addressInput = document.getElementById("addressInput");
   const resultsDiv = document.getElementById("results");
+  const address = addressInput.value.trim();
 
   if (!address) {
-    resultsDiv.innerHTML = "<p>Please enter a valid address.</p>";
+    resultsDiv.innerHTML = "<p>Please enter a full address.</p>";
     return;
   }
 
-  resultsDiv.innerHTML = "<p>Loading...</p>";
-
   const url =
-    `https://civicinfo.googleapis.com/civicinfo/v2/representatives?address=${encodeURIComponent(address)}&key=${API_KEY}`;
+    "https://civicinfo.googleapis.com/civicinfo/v2/representatives" +
+    "?address=" + encodeURIComponent(address) +
+    "&key=" + API_KEY;
+
+  console.log("Request URL:", url);
+
+  resultsDiv.innerHTML = "<p>Loading...</p>";
 
   try {
     const response = await fetch(url);
-    const data = await response.json();
 
-    if (data.error) {
-      resultsDiv.innerHTML = "<p>Could not retrieve data. Check your address.</p>";
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("API error:", response.status, text);
+      resultsDiv.innerHTML =
+        `<p>Error ${response.status}: Unable to retrieve representative data.</p>`;
       return;
     }
 
+    const data = await response.json();
     renderResults(data);
-  } catch (e) {
-    resultsDiv.innerHTML = "<p>Error contacting data service.</p>";
+
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    resultsDiv.innerHTML = "<p>Network error contacting data service.</p>";
   }
 }
+
 
 function renderResults(data) {
   const resultsDiv = document.getElementById("results");
