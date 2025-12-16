@@ -20,16 +20,17 @@ async function lookupReps() {
   const state = document.getElementById("stateInput")?.value.trim().toUpperCase();
 
   const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = "<p>Loading...</p>";
-
-  const federalDiv = document.getElementById("federalReps");
+  const federalSenateDiv = document.getElementById("federalSenate");
+  const federalHouseDiv = document.getElementById("federalHouse");
   const stateDiv = document.getElementById("stateReps");
 
-  federalDiv.innerHTML = "";
+  resultsDiv.innerHTML = "<p>Loading...</p>";
+  federalSenateDiv.innerHTML = "";
+  federalHouseDiv.innerHTML = "";
   stateDiv.innerHTML = "";
 
   if (!street || !city || !state) {
-    resultsDiv.innerHTML = "<p>Please fill in Street, City, and State (2-letter code).</p>";
+    resultsDiv.innerHTML = "<p>Please fill in Street, City, and State.</p>";
     return;
   }
 
@@ -44,30 +45,26 @@ async function lookupReps() {
     }
 
     const data = await response.json();
-    resultsDiv.innerHTML = ""; // Clear loading
+    resultsDiv.innerHTML = ""; // clear loading
 
-    // Filter federal and state reps
+    // Separate reps
     const federalReps = data.results.filter(r =>
       r.current_role &&
-      r.current_role.org_classification === "upper" &&
-      r.current_role.org.name.includes("United States")
-    );
-
-    const federalHouse = federalReps.filter(r =>
-      r.current_role.org_classification === "lower" &&
       r.current_role.org.name.includes("United States")
     );
 
     const federalSenate = federalReps.filter(r =>
-      r.current_role.org_classification === "upper" &&
-      r.current_role.org.name.includes("United States")
+      r.current_role.org_classification === "upper"
+    );
+
+    const federalHouse = federalReps.filter(r =>
+      r.current_role.org_classification === "lower"
     );
 
     const stateReps = data.results.filter(r => !federalReps.includes(r));
 
-    // Render sections
-    renderResults(federalSenate, federalDiv, "U.S. Senators");
-    renderResults(federalHouse, federalDiv, "U.S. House Representatives");
+    renderResults(federalSenate, federalSenateDiv, "U.S. Senators");
+    renderResults(federalHouse, federalHouseDiv, "U.S. House Representatives");
     renderResults(stateReps, stateDiv, "State Representatives");
 
   } catch (error) {
