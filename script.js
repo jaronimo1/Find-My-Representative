@@ -1,4 +1,4 @@
-const API_KEY = "AIzaSyDFInJt2GuvOUi-qn9SFLT8FbCrzBAGkCQ";
+const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
 
 async function lookupReps() {
   const addressInput = document.getElementById("addressInput");
