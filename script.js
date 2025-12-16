@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   button.addEventListener("click", lookupReps);
 
+  // Allow pressing Enter in any input to trigger lookup
   ["streetInput", "cityInput", "stateInput"].forEach(id => {
     const input = document.getElementById(id);
     if (input) {
@@ -20,11 +21,9 @@ async function lookupReps() {
   const state = document.getElementById("stateInput")?.value.trim().toUpperCase();
 
   const resultsDiv = document.getElementById("results");
-  const federalSenateDiv = document.getElementById("federalSenate");
-  const federalHouseDiv = document.getElementById("federalHouse");
   const stateDiv = document.getElementById("stateReps");
 
-  if (!resultsDiv || !federalSenateDiv || !federalHouseDiv || !stateDiv) return;
+  if (!resultsDiv || !stateDiv) return;
 
   if (!street || !city || !state) {
     resultsDiv.innerHTML = "<p>Please fill in Street, City, and State.</p>";
@@ -32,8 +31,6 @@ async function lookupReps() {
   }
 
   resultsDiv.innerHTML = "<p>Loading...</p>";
-  federalSenateDiv.innerHTML = "";
-  federalHouseDiv.innerHTML = "";
   stateDiv.innerHTML = "";
 
   const fullAddress = `${street}, ${city}, ${state}`;
@@ -43,24 +40,23 @@ async function lookupReps() {
     const response = await fetch(url);
 
     if (!response.ok) {
-      resultsDiv.innerHTML = `<p>Error ${response.status}: Could not retrieve representatives.</p>`;
+      if (response.status === 404) {
+        resultsDiv.innerHTML = "<p>No representatives found for this address.</p>";
+      } else {
+        resultsDiv.innerHTML = `<p>Error ${response.status}: Could not retrieve representatives.</p>`;
+      }
       return;
     }
 
     const data = await response.json();
 
     if (!data.results || data.results.length === 0) {
-      resultsDiv.innerHTML = "<p>No state representatives found for this address.</p>";
-      federalSenateDiv.innerHTML = "<h2>U.S. Senators</h2><p>Federal representatives are not available through OpenStates.</p>";
-      federalHouseDiv.innerHTML = "<h2>U.S. House Representatives</h2><p>Federal representatives are not available through OpenStates.</p>";
+      resultsDiv.innerHTML = "<p>No representatives found for this address.</p>";
       return;
     }
 
     resultsDiv.innerHTML = "";
     renderResults(data.results, stateDiv, "State Representatives");
-
-    federalSenateDiv.innerHTML = "<h2>U.S. Senators</h2><p>Federal representatives are not available through OpenStates.</p>";
-    federalHouseDiv.innerHTML = "<h2>U.S. House Representatives</h2><p>Federal representatives are not available through OpenStates.</p>";
 
   } catch (error) {
     console.error(error);
