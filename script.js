@@ -1,10 +1,3 @@
-// =======================
-// Civic Representatives Lookup
-// =======================
-
-// Your OpenStates API key
-const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
-
 document.addEventListener("DOMContentLoaded", () => {
   const button = document.getElementById("findButton");
   if (!button) return;
@@ -31,10 +24,7 @@ async function lookupReps() {
   const federalHouseDiv = document.getElementById("federalHouse");
   const stateDiv = document.getElementById("stateReps");
 
-  if (!resultsDiv || !federalSenateDiv || !federalHouseDiv || !stateDiv) {
-    console.error("One or more result containers not found.");
-    return;
-  }
+  if (!resultsDiv || !federalSenateDiv || !federalHouseDiv || !stateDiv) return;
 
   if (!street || !city || !state) {
     resultsDiv.innerHTML = "<p>Please fill in Street, City, and State.</p>";
@@ -59,7 +49,6 @@ async function lookupReps() {
 
     const data = await response.json();
 
-    // === Handle empty results ===
     if (!data.results || data.results.length === 0) {
       resultsDiv.innerHTML = "<p>No state representatives found for this address.</p>";
       federalSenateDiv.innerHTML = "<h2>U.S. Senators</h2><p>Federal representatives are not available through OpenStates.</p>";
@@ -67,12 +56,9 @@ async function lookupReps() {
       return;
     }
 
-    resultsDiv.innerHTML = ""; // clear loading
-
-    // Show state reps
+    resultsDiv.innerHTML = "";
     renderResults(data.results, stateDiv, "State Representatives");
 
-    // Show message for federal reps
     federalSenateDiv.innerHTML = "<h2>U.S. Senators</h2><p>Federal representatives are not available through OpenStates.</p>";
     federalHouseDiv.innerHTML = "<h2>U.S. House Representatives</h2><p>Federal representatives are not available through OpenStates.</p>";
 
