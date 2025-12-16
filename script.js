@@ -4,7 +4,7 @@
 // =======================
 
 // Replace this with your actual OpenStates API key
-const API_KEY = "YOUR_OPENSTATES_KEY_HERE";
+const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
 
 /**
  * Main function to look up representatives by address
