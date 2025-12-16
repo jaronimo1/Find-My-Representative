@@ -3,41 +3,54 @@
 // OpenStates Representative Lookup
 // =======================
 
-// Replace this with your actual OpenStates API key
+// Replace this with your OpenStates API key
 const API_KEY = "68fbc8ef-b90c-4e6c-bdfe-55469607ff45";
 
+/**
+ * Main function to look up representatives by address
+ */
 async function lookupReps() {
-  const addressInput = document.getElementById("addressInput");
-  const resultsDiv = document.getElementById("results");
-  const address = addressInput.value.trim();
+  const street = document.getElementById("streetInput").value.trim();
+  const city = document.getElementById("cityInput").value.trim();
+  const state = document.getElementById("stateInput").value.trim().toUpperCase();
 
-  if (!address) {
-    resultsDiv.innerHTML = "<p>Please enter a full address.</p>";
+  const resultsDiv = document.getElementById("results");
+
+  if (!street || !city || !state) {
+    resultsDiv.innerHTML = "<p>Please fill in Street, City, and State (2-letter code).</p>";
     return;
   }
 
   resultsDiv.innerHTML = "<p>Loading...</p>";
 
-  const url = `https://v3.openstates.org/people?jurisdiction=US&address=${encodeURIComponent(address)}&apikey=${API_KEY}`;
+  const fullAddress = `${street}, ${city}, ${state}`;
+
+  // Construct OpenStates API URL
+  const url = `https://v3.openstates.org/people?jurisdiction=${state}&address=${encodeURIComponent(fullAddress)}&apikey=${API_KEY}`;
 
   try {
     const response = await fetch(url);
+
     if (!response.ok) {
       resultsDiv.innerHTML = `<p>Error ${response.status}: Could not retrieve representatives.</p>`;
       return;
     }
 
     const data = await response.json();
-    renderResults(data.results);
+    renderResults(data.results, resultsDiv);
+
   } catch (error) {
     console.error("Network or fetch error:", error);
     resultsDiv.innerHTML = "<p>Network error while retrieving data.</p>";
   }
 }
 
-function renderResults(reps) {
-  const resultsDiv = document.getElementById("results");
-
+/**
+ * Render representatives into the page
+ * @param {Array} reps
+ * @param {HTMLElement} resultsDiv
+ */
+function renderResults(reps, resultsDiv) {
   if (!reps || reps.length === 0) {
     resultsDiv.innerHTML = "<p>No representatives found for this address.</p>";
     return;
@@ -65,9 +78,9 @@ function renderResults(reps) {
     .join("");
 }
 
-// Optional: handle Enter key press
-document.getElementById("addressInput").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    lookupReps();
-  }
+// Optional: allow Enter key on any input to trigger lookup
+["streetInput", "cityInput", "stateInput"].forEach(id => {
+  document.getElementById(id).addEventListener("keypress", function(e) {
+    if (e.key === "Enter") lookupReps();
+  });
 });
