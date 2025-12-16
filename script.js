@@ -1,4 +1,4 @@
-const API_KEY = "YOUR_GOOGLE_CIVIC_API_KEY_HERE";
+const API_KEY = "YOUR_API_KEY_HERE";
 
 async function lookupReps() {
   const address = document.getElementById("addressInput").value.trim();
